@@ -193,9 +193,109 @@ public class PriorityQueue<E> extends AbstractQueue<E>
 
 假如定义的数组数据如下：
 ```
-Character[] queue = new Character[]{'a','b','c','d','e','f','g'};
+Character[] queue = new Character[]{'a','b','C','D','E','F','G'};
 ```
-那么数组下标为零的元素就在堆顶，此时堆顶元素为'a',那么'a'左边的元素就是'b','a'右边的元素就是'c'，'b'的左边元素为'd'，右边元素为'e'，以此类推，最终构成了小顶堆的结构。
+那么数组下标为零的元素就在堆顶，此时堆顶元素为'a',那么'a'左边的元素就是'b','a'右边的元素就是'C'，'b'的左边元素为'D'，右边元素为'E'，以此类推，最终构成了小顶堆的结构。
 如下图所示:
 
 <img src="https://raw.githubusercontent.com/Zack-Zz/algorithm024/main/Week_01/imgs/min_head_heap.png" width= "300" alt="structureV1.0" align=center />
+
+我们基本可以得出几个通用的公式：
+```
+公式1：父节点在数组中的下标 = (当前节点下标值 - 1) / 2
+公式2：左节点的下标 = 当前节点下标值*2 + 1 
+公式3：右节点的下标 = 当前节点下标值*2 + 2 
+```
+这几个公式会在`PriorityQueue`中使用。
+
+#### offer()
+我们先来看下插入元素。
+```java
+public class PriorityQueue<E>{
+    /**
+     * Inserts the specified element into this priority queue.
+     *
+     * @return {@code true}
+     */
+    public boolean offer(E e) {
+        if (e == null)
+            throw new NullPointerException();
+        modCount++;
+        int i = size;
+        if (i >= queue.length)
+            grow(i + 1);  //扩容
+        size = i + 1;
+        if (i == 0)
+            queue[0] = e;
+        else
+            siftUp(i, e);
+        return true;
+    }
+
+    /**
+     * Inserts item x at position k, maintaining heap invariant by
+     * promoting x up the tree until it is greater than or equal to
+     * its parent, or is the root.
+     *
+     * To simplify and speed up coercions and comparisons. the
+     * Comparable and Comparator versions are separated into different
+     * methods that are otherwise identical. (Similarly for siftDown.)
+     *
+     * @param k the position to fill
+     * @param x the item to insert
+     */
+    private void siftUp(int k, E x) {
+        if (comparator != null)
+            siftUpUsingComparator(k, x);
+        else
+            siftUpComparable(k, x);
+    }
+    private void siftUpUsingComparator(int k, E x) {
+        while (k > 0) {
+            int parent = (k - 1) >>> 1;
+            Object e = queue[parent];
+            if (comparator.compare(x, (E) e) >= 0)
+                break;
+            queue[k] = e;
+            k = parent;
+        }
+        queue[k] = x;
+    }
+    private void siftUpComparable(int k, E x) {
+        Comparable<? super E> key = (Comparable<? super E>) x;
+        while (k > 0) {
+            int parent = (k - 1) >>> 1;
+            Object e = queue[parent];
+            if (key.compareTo((E) e) >= 0)
+                break;
+            queue[k] = e;
+            k = parent;
+        }
+        queue[k] = key;
+    }
+}
+```
+在`offer()`方法进来时，判断数组长度是否容量不足，容量不足则通过`grow()`方法扩容:
+```
+    private void grow(int minCapacity) {
+        int oldCapacity = queue.length;
+        // Double size if small; else grow by 50%
+        int newCapacity = oldCapacity + ((oldCapacity < 64) ?
+                                         (oldCapacity + 2) :
+                                         (oldCapacity >> 1));
+        // overflow-conscious code
+        if (newCapacity - MAX_ARRAY_SIZE > 0)
+            newCapacity = hugeCapacity(minCapacity);
+        queue = Arrays.copyOf(queue, newCapacity);
+    }
+```
+当前数组容量小于64，则新的容量为原来的容量+2；当前数组容量大于64，则新的容量为原来的容量基础上再增加50%，最大不能超过`Int`的最大值。
+
+核心方法是`siftUp()`方法，非空队列每次新增元素都需要重新调整堆。
+我们以`siftUpUsingComparator()`方法为例：
+1. `int parent = (k - 1) >>> 1;` 其实就是使用`公式1`计算parent的值；
+2. 第一次循环最后一个值与父节点比较，如果是最大值，则不用动，否则这两个元素位置置换；
+3. 继续循环，直到跳出循环，或者到堆顶;
+
+#### peek()
+获取元素就比较简单，获取最小值的那个元素，本质上就是获取数组的最小值。
