@@ -198,4 +198,4 @@ Character[] queue = new Character[]{'a','b','c','d','e','f','g'};
 那么数组下标为零的元素就在堆顶，此时堆顶元素为'a',那么'a'左边的元素就是'b','a'右边的元素就是'c'，'b'的左边元素为'd'，右边元素为'e'，以此类推，最终构成了小顶堆的结构。
 如下图所示:
 
-<img src="http://git.jimuitech.com/egg/workflow/raw/master/doc/imgs/overallstructure.png" width= "500" alt="structureV1.0" align=center />
+<img src="https://raw.githubusercontent.com/Zack-Zz/algorithm024/main/Week_01/imgs/min_head_heap.png" width= "500" alt="structureV1.0" align=center />
