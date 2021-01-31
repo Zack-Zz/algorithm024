@@ -148,4 +148,54 @@ public class LinkedList<E>{
 >
 > version: java12
 
-`PriorityQueue`也是`Queue`的一个具体实现，其功能主要是实现了元素的有序性。
+`PriorityQueue`也是`Queue`的一个具体实现，是基于优先级堆的无界优先队列，其功能主要是实现了元素的有序性。如果想要使用线程安全的优先队列，则应该使用`PriorityBlockingQueue`。
+`PriorityQueue`的排序是自然顺序排序或者是实现`Comparator`，这取决于构造的时候用哪个构造函数，插入的元素不能为空，不能不可比较。
+
+### PriorityQueue Define
+```java
+public class PriorityQueue<E> extends AbstractQueue<E>
+    implements java.io.Serializable {
+    
+    private static final int DEFAULT_INITIAL_CAPACITY = 11;
+    
+    /**
+     * Priority queue represented as a balanced binary heap: the two
+     * children of queue[n] are queue[2*n+1] and queue[2*(n+1)].  The
+     * priority queue is ordered by comparator, or by the elements'
+     * natural ordering, if comparator is null: For each node n in the
+     * heap and each descendant d of n, n <= d.  The element with the
+     * lowest value is in queue[0], assuming the queue is nonempty.
+     */
+    transient Object[] queue; // non-private to simplify nested class access
+
+    /**
+     * The number of elements in the priority queue.
+     */
+    private int size = 0;
+
+    /**
+     * The comparator, or null if priority queue uses elements'
+     * natural ordering.
+     */
+    private final Comparator<? super E> comparator;
+
+    /**
+     * The number of times this priority queue has been
+     * <i>structurally modified</i>.  See AbstractList for gory details.
+     */
+    transient int modCount = 0; 
+}
+```
+`PriorityQueue`底层是一个数组作为容器，初始容量为11。
+
+那为什么是数组呢？
+这源自于`PriorityQueue`数据结构的设计是二叉小顶堆，而它正好可以通过数组表示。
+
+假如定义的数组数据如下：
+```
+Character[] queue = new Character[]{'a','b','c','d','e','f','g'};
+```
+那么数组下标为零的元素就在堆顶，此时堆顶元素为'a',那么'a'左边的元素就是'b','a'右边的元素就是'c'，'b'的左边元素为'd'，右边元素为'e'，以此类推，最终构成了小顶堆的结构。
+如下图所示:
+
+<img src="http://git.jimuitech.com/egg/workflow/raw/master/doc/imgs/overallstructure.png" width= "500" alt="structureV1.0" align=center />
